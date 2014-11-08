@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>TTest</title>
+<link rel="stylesheet" type="text/css" href="PageStyle.css">
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script>
+	var diseaseNames;
+	$(document)
+			.ready(
+					function() {
+						$('#ResultBox').hide();
+						$.ajax({
+							type : "POST",
+							url : "./RequestProcessingServlet",
+							data : "action=ttestLoadInfo",
+							success : function(data) {
+
+								var obj = $.parseJSON(data);
+								var goValues = obj.goValues;
+								diseaseNames = obj.diseaseNames;
+
+								var element1 = $("#GO");
+								for (i = 0; i < goValues.length; i++) {
+									var j = goValues[i];
+									element1.append('<option value="'+j+'">'
+											+ j + '</option>');
+
+								}
+								;
+
+								var element2 = $("#Disease1");
+								for (i = 0; i < diseaseNames.length; i++) {
+									var k = diseaseNames[i];
+									element2.append('<option value="'+k+'">'
+											+ k + '</option>');
+
+								}
+								;
+							},
+							error : function(jqXHR, textStatus, errorThrown) {
+								alert(errorThrown)
+							}
+						});
+
+						$("#GeneData").submit(
+								function(event) {
+									event.preventDefault();
+									var url = "./RequestProcessingServlet";
+									var formData = $("#GeneData").serialize();
+									$.ajax({
+										type : "POST",
+										url : url,
+										data : formData, // serializes the form's elements.
+										async : false,
+										complete : function(data) {
+											console.log(data.responseText);
+											var obj = $.parseJSON(data.responseText);
+											value='Under Equal Variances:' + obj[0] +'<br>UnEqual Variances:' + obj[2];
+											$('#Result').html(
+													value
+													);
+											$('#ResultBox').show();
+
+										},
+										error : function(jqXHR, textStatus,
+												errorThrown) {
+											alert(errorThrown)
+										}
+									});
+
+									return false; // avoid to execute the actual submit of the form.
+								});
+
+						$("#Disease1")
+								.change(
+										function() {
+											$("#Disease2").empty();
+											var element2 = $("#Disease2");
+											var disease1 = $(
+													"#Disease1 option:selected")
+													.text();
+											element2
+													.append('<option value="" disabled selected style="display:none;"></option>');
+											element2
+													.append('<option value="'+'AllOthers'+'">'
+															+ 'Others'
+															+ '</option>');
+											for (i = 0; i < diseaseNames.length; i++) {
+												if (diseaseNames[i]
+														.toLowerCase() === disease1
+														.toLowerCase())
+
+												{
+													continue;
+												}
+												var k = diseaseNames[i];
+												element2
+														.append('<option value="'+k+'">'
+																+ k
+																+ '</option>');
+
+											}
+											;
+										});
+
+					});
+</script>
+<body>
+	<div id="tabs23">
+		<ul>
+			<li><a href="http://localhost:8080/DataWareHousing/index.html"
+				title="Query 1"><span>Query 1</span></a></li>
+			<li><a href="http://localhost:8080/DataWareHousing/query2.html"
+				title="Query 2"><span>Query 2</span></a></li>
+			<li><a href="http://localhost:8080/DataWareHousing/query3.html"
+				title="Query 3"><span>Query 3</span></a></li>
+			<li><a href="http://localhost:8080/DataWareHousing/ttest.html"
+				title="T Test"><span>T Test</span></a></li>
+			<li><a href="http://localhost:8080/DataWareHousing/ftest.html"
+				title="F Test"><span>F Test</span></a></li>
+			<li><a
+				href="http://localhost:8080/DataWareHousing/correlation.html"
+				title="Correlation"><span>Correlation</span></a></li>
+			<li><a
+				href="http://localhost:8080/DataWareHousing/learning.html"
+				title="Test New Samples"><span>Test New Samples</span></a></li>
+		</ul>
+	</div>
+
+	<div id="ResultBox" class="Box">
+		<label id="Result"></label>
+	</div>
+	<form id="GeneData" class="FormPos">
+		Perform T-Test on gene expression values between two patients for a given goId and diseases
+		<p>
+			<label>Go ID:</label> <select name="GO" id="GO">
+				<option value="" disabled selected style="display: none;"></option>
+			</select>
+		</p>
+
+		<p>
+			<label>Disease1:</label> <select name="Disease1" id="Disease1">
+				<option value="" disabled selected style="display: none;"></option>
+			</select>
+			
+		
+		</p>
+
+		<p>
+			<label>Disease2:</label> <select name="Disease2" id="Disease2">
+				<option value="" disabled selected style="display: none;">Select
+					Disease1 First</option>
+			</select>
+		</p>
+		<input type="hidden" name="action" value="ttest"> <input
+			type="submit" value="Evaluate" id="GeneDataSubmit" />
+	</form>
+
+
+</body>
+</html>

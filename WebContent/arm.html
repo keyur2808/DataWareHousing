@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Inform</title>
+<link rel="stylesheet" type="text/css" href="PageStyle.css">
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script>
+	var obj = null;
+	var nameValues = null;
+	var typeValues = null;
+	var descriptionValues = null;
+	$(document).ready(function() {
+		$("#GeneData").submit(function(event) {
+			event.preventDefault();
+			var url = "./RequestProcessingServlet";
+			var formData = $("#GeneData").serialize();
+			$.ajax({
+				type : "POST",
+				url : url,
+				data : formData, // serializes the form's elements.
+				async : false,
+				complete : function(data) {
+					console.log(data.responseText);
+					var obj = data.responseText;
+					$("#Result").html(obj);
+					
+				},
+				error : function(jqXHR, textStatus, errorThrown) {
+					alert(errorThrown)
+				}
+			});
+
+			return false; // avoid to execute the actual submit of the form.
+		});
+
+	
+	
+	});	
+</script>
+<body>
+<form id="GeneData">
+<input type="text" name="MIN_SUPPORT"></input>
+<input type="text" name="MIN_CONFIDENCE"></input>
+<input type="hidden" name="action" value="arm"> <input
+			type="submit" value="Evalaute">
+</form>
+</body>
+<textarea rows="100%" cols="100%" id="Result"></textarea>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+<link type="text/css" rel="stylesheet" href="./PageStyle.css">
+<link type="text/css" rel="stylesheet" href="./style.css">
+</head>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script>
+$(document).ready(
+		function() {
+			$(".Box").hide();
+			$(".List").hide();
+			$.ajax({
+				type : "POST",
+				url : "./RequestProcessingServlet",
+				data : "action=ttestLoadInfo",
+				success : function(data) {
+					var obj = $.parseJSON(data);
+				    var diseases=obj.diseaseNames;
+				    var patient=obj.patientNames;
+				    
+					for (i = 0; i < diseases.length; i++) {
+						var j = diseases[i];
+						$("#Disease").append('<option value="'+j+'">' + j
+								+ '</option>');
+
+					}
+					
+					for (i = 0; i < patient.length; i++) {
+							var j = patient[i];
+							$("#Patient").append('<option value="'+j+'">' + j
+									+ '</option>');
+
+						}
+						
+				
+				},
+			});
+			
+			$("#GeneData").submit(function(event) {
+				event.preventDefault();
+				var url = "./RequestProcessingServlet";
+				var formData = $("#GeneData").serialize();
+				$.ajax({
+					type : "POST",
+					url : url,
+					data : formData, // serializes the form's elements.
+					async : false,
+					complete : function(data) {
+						console.log(data.responseText);
+						var obj = $.parseJSON(data.responseText);
+					    var result=obj.result;
+					    var count=obj.count;
+					    if (count ===null || count===0){
+					    	result="Insufficient Data";
+					    }
+					    var geneList=obj.geneExpressionValues;
+					    var txt='Result: ' + result;
+					    txt=txt+'<br>No of informative Genes: '+count;
+					   
+						$('#Result').html(txt
+								);
+						$('#ResultBox').show();
+						
+						$('.List tr').remove();
+						$('.List').append('<tr><th>Informative Genes (Id)</th></tr>');
+						for (i = 0; i < geneList.length; i++) {
+							var j = geneList[i];
+							$(".List").append( '<tr><td>'+j+'</td></tr>' );
+
+						}
+						if (count!=0){
+							$(".List").show();
+						}
+
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						alert(errorThrown)
+					}
+				});
+
+				return false; // avoid to execute the actual submit of the form.
+			});
+
+
+			
+	});
+</script>	
+
+
+<body>
+<div id="tabs23">
+		<ul>
+			<li><a href="./index.html"
+				title="Query 1"><span>Query 1</span></a></li>
+			<li><a href="./query2.html"
+				title="Query 2"><span>Query 2</span></a></li>
+			<li><a href="./query3.html"
+				title="Query 3"><span>Query 3</span></a></li>
+			<li><a href="./ttest.html"
+				title="T Test"><span>T Test</span></a></li>
+			<li><a href="./ftest.html"
+				title="F Test"><span>F Test</span></a></li>
+			<li><a
+				href="./correlation.html"
+				title="Correlation"><span>Correlation</span></a></li>
+			<li><a
+				href="./learning.html"
+				title="Test New Samples"><span>Test New Samples</span></a></li>
+		</ul>
+	</div>
+<div id="ResultBox" class="Box">
+<label id="Result"></label>
+</div>
+
+<form id="GeneData" class="FormPos2">
+Select a test patient and disease name to predict with help of gene expression values if he/she has that disease
+<p>
+			<label>DiseaseName:</label> <select name="Disease" id="Disease">
+				<option value="" disabled selected style="display: none;"></option>
+			</select>
+</p>
+
+
+<p>
+			<label>Patient:</label> <select name="Patient" id="Patient">
+				<option value="" disabled selected style="display: none;"></option>
+			</select>
+
+</p>
+<br>
+<input type="hidden" name="action" value="affectedPatients"> <input
+			type="submit" value="Evaluate" id="Evaluate" />
+</form>
+<table class="List">
+</table>
+</body>
+</html>

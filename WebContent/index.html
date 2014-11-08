@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Inform</title>
+<link rel="stylesheet" type="text/css" href="PageStyle.css">
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+
+
+
+<script>
+	var obj = null;
+	var nameValues = null;
+	var typeValues = null;
+	var descriptionValues = null;
+	$(document).ready(function() {
+		$(".Box").hide();
+		$.ajax({
+			type : "POST",
+			url : "./RequestProcessingServlet",
+			data : "action=populate",
+			success : function(data) {
+				obj = $.parseJSON(data);
+				nameValues = obj.nameValues;
+				typeValues = obj.typeValues;
+				descriptionValues = obj.descriptionValues;
+				clusterIds = obj.clusterIds;
+				measuremtIds = obj.measureIds;
+
+			},
+			error : function(jqXHR, textStatus, errorThrown) {
+				alert(errorThrown)
+			}
+		});
+
+		$('[name=DiseaseCategory]').click(function() {
+			var value = $(this).val();
+			switch (value) {
+			case 'diseaseName':
+				loadNames();
+				break;
+			case 'diseaseType':
+				loadTypes();
+				break;
+			case 'diseaseDescription':
+				loadDescription();
+				break;
+			default:
+				alert("Unknown Choice<br/>");
+			}
+			;
+		});
+
+		$("#GeneData").submit(function(event) {
+			event.preventDefault();
+			var url = "./RequestProcessingServlet";
+			var formData = $("#GeneData").serialize();
+			$.ajax({
+				type : "POST",
+				url : url,
+				data : formData, // serializes the form's elements.
+				async : false,
+				complete : function(data) {
+					console.log(data.responseText);
+					var obj = data.responseText;
+					$("#Result").html('Count:' + obj);
+					$("#ResultBox").show();
+
+				},
+				error : function(jqXHR, textStatus, errorThrown) {
+					alert(errorThrown)
+				}
+			});
+
+			return false; // avoid to execute the actual submit of the form.
+		});
+
+	});
+
+	function loadNames() {
+		$(".innerRadio").remove();
+		var element = document.createElement('select');
+		element.id = 'diseaseName';
+		element.name = 'diseaseName';
+		element.className = 'innerRadio';
+		$('#D1').append(element);
+		$("#diseaseName")
+				.append(
+						'<option value="" disabled selected style="display: none;"></option>;');
+		for (i = 0; i < nameValues.length; i++) {
+			var j = nameValues[i];
+			$("#diseaseName")
+					.append('<option value="'+j+'">' + j + '</option>');
+
+		}
+
+	}
+
+	function loadDescription() {
+		$(".innerRadio").remove();
+		var element = document.createElement('select');
+		element.id = 'diseaseDescription';
+		element.name = 'diseaseDescription';
+		element.className = 'innerRadio';
+		$('#D3').append(element);
+		$("#diseaseDescription")
+				.append(
+						'<option value="" disabled selected style="display: none;"></option>;');
+		for (i = 0; i < descriptionValues.length; i++) {
+			var j = descriptionValues[i];
+			$("#diseaseDescription").append(
+					'<option value="'+j+'">' + j + '</option>');
+
+		}
+	}
+
+	function loadTypes() {
+		$(".innerRadio").remove();
+		var element = document.createElement('select');
+		element.id = 'diseaseType';
+		element.name = 'diseaseType';
+		element.className = 'innerRadio';
+		$('#D2').append(element);
+		$("#diseaseType")
+				.append(
+						'<option value="" disabled selected style="display: none;"></option>;');
+		for (i = 0; i < typeValues.length; i++) {
+			var j = typeValues[i];
+			$("#diseaseType")
+					.append('<option value="'+j+'">' + j + '</option>');
+
+		}
+	}
+</script>
+<body>
+	<div id="tabs23">
+		<ul>
+			<li><a href="./index.html"
+				title="Query 1"><span>Query 1</span></a></li>
+			<li><a href="./query2.html"
+				title="Query 2"><span>Query 2</span></a></li>
+			<li><a href="./query3.html"
+				title="Query 3"><span>Query 3</span></a></li>
+			<li><a href="./ttest.html"
+				title="T Test"><span>T Test</span></a></li>
+			<li><a href="./ftest.html"
+				title="F Test"><span>F Test</span></a></li>
+			<li><a
+				href="./correlation.html"
+				title="Correlation"><span>Correlation</span></a></li>
+			<li><a
+				href="./learning.html"
+				title="Test New Samples"><span>Test New Samples</span></a></li>
+		</ul>
+	</div>
+
+	<div id="ResultBox" class="Box">
+		<label id="Result"></label>
+	</div>
+
+
+	<form id="GeneData" class="FormPos">
+
+		<p>
+			<label>Search Patient Count In Store By:</label>
+		</p>
+
+		<p id="D1">
+			<input type="radio" name="DiseaseCategory" value="diseaseName">DiseaseName
+		</p>
+
+		<p id="D2">
+			<br> <input type="radio" name="DiseaseCategory"
+				value="diseaseType">DiseaseType
+		</p>
+
+		<p id="D3">
+			<br> <input type="radio" name="DiseaseCategory"
+				value="diseaseDescription">DiseaseDescription
+		</p>
+		<input type="hidden" name="action" value="patientCount"> <input
+			type="submit" value="Evalaute"> <br>
+	</form>
+
+</body>
+</html>

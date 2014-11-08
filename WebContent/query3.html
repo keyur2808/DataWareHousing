@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="PageStyle.css">
+<link rel="stylesheet" type="text/css" href="style.css">
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script>
+var obj=null;
+var nameValues=null;
+var typeValues=null;
+var descriptionValues=null;
+$(document).ready(function() {
+	$(".Box").hide();
+	$(".List").hide();
+	$.ajax({
+		type : "POST",
+		url : "./RequestProcessingServlet",
+		data : "action=populate",
+		success : function(data) {
+			obj = $.parseJSON(data);
+			nameValues = obj.nameValues;
+			typeValues = obj.typeValues;
+			descriptionValues = obj.descriptionValues;
+			clusterIds=obj.clusterIds;
+			measuremtIds=obj.measureIds;
+			for (i = 0; i < nameValues.length; i++) {
+				var j = nameValues[i];
+				$("#D5").append('<option value="'+j+'">' + j
+						+ '</option>');
+
+			}
+			
+			for (i = 0; i < clusterIds.length; i++) {
+				var j = clusterIds[i];
+				$("#D6").append('<option value="'+j+'">' + j
+						+ '</option>');
+
+			}
+			
+			for (i = 0; i < measuremtIds.length; i++) {
+				var j = measuremtIds[i];
+				$("#D7").append('<option value="'+j+'">' + j
+						+ '</option>');
+
+			}
+			
+		},
+		error : function(jqXHR, textStatus, errorThrown) {
+			alert(errorThrown)
+		}
+	});
+	
+
+$("#ExpressionValues").submit(function(event) {
+	event.preventDefault();
+	var url = "./RequestProcessingServlet"; 
+	var formData=$("#ExpressionValues").serialize();
+    $.ajax({
+			type: "POST",
+			url: url,
+			data: formData, // serializes the form's elements.
+			async:false,
+			complete: function(data)
+			{
+			console.log(data);
+			var ans = JSON.parse(data.responseText);
+			$('#Result').html('mRNA ExpressionValues Count: '+ans.length);
+			$('#ResultBox').show();
+			
+			$('.List tr').remove();
+			$('.List').append('<tr><th>mRNA Values</th></tr>');
+			for (i = 0; i < ans.length; i++){
+				$('.List').append( '<tr><td>'+ans[i]+'</td></tr>' );
+				}
+				if (ans.length !=0){
+				$('.List').show();
+			    }
+				
+			
+			},
+			error : function(jqXHR, textStatus, errorThrown) {
+			alert(errorThrown)
+		}
+});
+
+return false;		// avoid to execute the actual submit of the form.
+});
+
+});
+
+</script>
+</head>
+
+<body>
+
+	<div id="tabs23">
+		<ul>
+			<li><a href="./index.html" title="Query 1"><span>Query
+						1</span></a></li>
+			<li><a href="./query2.html" title="Query 2"><span>Query
+						2</span></a></li>
+			<li><a href="./query3.html" title="Query 3"><span>Query
+						3</span></a></li>
+			<li><a href="./ttest.html" title="T Test"><span>T
+						Test</span></a></li>
+			<li><a href="./ftest.html" title="F Test"><span>F
+						Test</span></a></li>
+			<li><a href="./correlation.html" title="Correlation"><span>Correlation</span></a></li>
+			<li><a href="./learning.html" title="Test New Samples"><span>Test
+						New Samples</span></a></li>
+		</ul>
+	</div>
+	<div id="ResultBox" class="Box">
+		<label id="Result"></label>
+	</div>
+
+
+	<form id="ExpressionValues" class="FormPos">
+		View gene expressions for disease belonging to a cluster from an experiment
+		<p>
+			<br> <label>Disease Name</label> <select name="disease" id="D5">
+				<option value="" disabled selected style="display: none;"></option>
+			</select>
+		</p>
+		<p>
+			<br> <label>Disease Cluster</label> <select name="clusterId"
+				id="D6">
+				<option value="" disabled selected style="display: none;"></option>
+			</select>
+		</p>
+		<p>
+			<br> <label>Disease MeasureId/Experiment</label> <select name="measureId"
+				id="D7">
+				<option value="" disabled selected style="display: none;"></option>
+			</select>
+		</p>
+		<br> <input type="hidden" name="action" value="expressionList">
+		<input type="submit" value="Evalaute"> <br>
+
+	</form>
+	<table class="List">
+	</table>
+</body>
+</html>
